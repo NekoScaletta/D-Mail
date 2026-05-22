@@ -37,7 +37,7 @@ Mở `http://localhost:8000/docs` để xem Swagger UI.
 
 ### 2. Train model thật
 
-Backend có sẵn dataset mẫu tại `backend/data/spam.csv`. Có thể thay bằng dataset lớn hơn miễn là có cột `label` và `text` hoặc `message`.
+Backend có sẵn dataset SpamAssassin tại `backend/data/spam.csv`, được chuẩn hoá từ bộ dữ liệu OpenScience/Kaggle. Có thể thay bằng dataset lớn hơn miễn là có cột `label` và `text` hoặc `message`.
 
 ```bash
 cd backend

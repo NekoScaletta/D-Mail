@@ -44,7 +44,7 @@ Response mẫu:
 
 ## Train model
 
-Dataset nằm tại `data/spam.csv`. File cần có cột:
+Dataset nằm tại `data/spam.csv`. File hiện tại dùng bộ SpamAssassin từ OpenScience/Kaggle và đã được chuẩn hoá về các cột:
 
 - `label`: `ham`, `spam`, `0`, hoặc `1`.
 - `text` hoặc `message`: nội dung email.
