@@ -1,0 +1,9 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+data/*.jsonl
+models/*.pkl
+models/*.joblib
+training/evaluation_report.txt
+training/confusion_matrix.csv

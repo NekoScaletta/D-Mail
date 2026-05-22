@@ -1,0 +1,10 @@
+{
+  "installCommand": "pip install -r requirements.txt",
+  "buildCommand": "python training/train_model.py",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.py"
+    }
+  ]
+}
