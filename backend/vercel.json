@@ -1,10 +1,23 @@
 {
-  "installCommand": "pip install -r requirements.txt",
-  "buildCommand": "python training/train_model.py",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.py"
+  "experimentalServices": {
+    "d-mail-backend": {
+      "framework": "fastapi",
+      "entrypoint": "api/index.py",
+      "routePrefix": "/",
+      "buildCommand": "pip install -r requirements.txt && python training/train_model.py",
+      "includeFiles": [
+        "app/**",
+        "api/**",
+        "data/spam.csv",
+        "models/**",
+        "training/**",
+        "requirements.txt"
+      ],
+      "excludeFiles": [
+        ".venv/**",
+        "venv/**",
+        "data/*.jsonl"
+      ]
     }
-  ]
+  }
 }
