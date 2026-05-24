@@ -21,6 +21,7 @@ Endpoint chính:
 - `GET /`: kiểm tra server.
 - `GET /health`: kiểm tra trạng thái model.
 - `POST /predict`: phân loại email.
+- `POST /predict-image`: phân loại ảnh chụp email bằng ChatGPT API khi có `OPENAI_API_KEY`.
 
 Body mẫu:
 
@@ -40,6 +41,26 @@ Response mẫu:
   "model_status": "trained",
   "message": "Dự đoán bằng model đã train."
 }
+```
+
+## ChatGPT API
+
+Nếu cấu hình `OPENAI_API_KEY`, endpoint `/predict` sẽ ưu tiên OpenAI Responses API để phân loại văn bản. Nếu không có key hoặc OpenAI lỗi, backend tự fallback về model TF-IDF đã train.
+
+Endpoint `/predict-image` nhận JSON:
+
+```json
+{
+  "image_base64": "<base64>",
+  "mime_type": "image/png"
+}
+```
+
+Biến môi trường:
+
+```env
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
 ```
 
 ## Train model

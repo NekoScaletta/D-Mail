@@ -463,6 +463,30 @@
         counter.textContent = `${textarea.value.trim().length} ký tự`;
       }
 
+      function renderPrediction(data) {
+        const isSpam = data.label === 1;
+        const confidence = Math.round(data.confidence * 100);
+        const statusMap = {
+          openai: 'ChatGPT API',
+          trained: 'Model đã train',
+          demo: 'Fallback tạm',
+        };
+        modelStatus.textContent = statusMap[data.model_status] || data.model_status || 'Đã phân loại';
+        const reason = data.reason ? `<p>${data.reason}</p>` : '';
+        const extractedText = data.extracted_text
+          ? `<p><strong>Nội dung đọc được:</strong> ${data.extracted_text.slice(0, 260)}${data.extracted_text.length > 260 ? '...' : ''}</p>`
+          : '';
+        setResult(
+          `<span class="badge">${isSpam ? 'Spam' : 'Không spam'}</span>
+           <div class="confidence">${confidence}%</div>
+           <p>${data.message}</p>
+           ${reason}
+           ${extractedText}
+           <div class="meter"><span style="width: ${confidence}%"></span></div>`,
+          `prediction-card ${isSpam ? 'spam' : 'ham'}`,
+        );
+      }
+
       async function predictText(text) {
         const value = text.trim();
         if (!value) {
@@ -486,16 +510,7 @@
             throw new Error(data.detail || 'Backend không phản hồi hợp lệ.');
           }
 
-          const isSpam = data.label === 1;
-          const confidence = Math.round(data.confidence * 100);
-          modelStatus.textContent = data.model_status === 'trained' ? 'Model đã train' : 'Fallback tạm';
-          setResult(
-            `<span class="badge">${isSpam ? 'Spam' : 'Không spam'}</span>
-             <div class="confidence">${confidence}%</div>
-             <p>${data.message}</p>
-             <div class="meter"><span style="width: ${confidence}%"></span></div>`,
-            `prediction-card ${isSpam ? 'spam' : 'ham'}`,
-          );
+          renderPrediction(data);
         } catch (error) {
           setResult(error.message || 'Không thể kết nối backend.', 'status-box danger');
         } finally {
@@ -551,6 +566,36 @@
         return ocrWorker;
       }
 
+      function imageToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = String(reader.result || '');
+            resolve(result.includes(',') ? result.split(',')[1] : result);
+          };
+          reader.onerror = () => reject(new Error('Không thể đọc file ảnh.'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function predictImageWithAi(file) {
+        const imageBase64 = await imageToBase64(file);
+        const response = await fetch(`${API_URL}/predict-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image_base64: imageBase64,
+            mime_type: file.type || 'image/png',
+            use_ai: true,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || 'Backend chưa phân loại được ảnh bằng ChatGPT API.');
+        }
+        return data;
+      }
+
       async function checkImage() {
         if (!selectedImage) {
           ocrStatus.textContent = 'Vui lòng chọn hoặc kéo thả ảnh trước.';
@@ -559,27 +604,39 @@
 
         imageButton.disabled = true;
         button.disabled = true;
-        imageButton.textContent = 'Đang đọc ảnh...';
-        setResult('Đang đọc chữ trong ảnh...', 'status-box');
+        imageButton.textContent = 'Đang kiểm tra ảnh...';
+        setResult('Đang gửi ảnh đến backend AI...', 'status-box');
 
         try {
-          const worker = await getWorker();
-          const result = await worker.recognize(selectedImage);
-          const text = result.data.text.trim();
-          if (!text) {
-            throw new Error('Không đọc được chữ trong ảnh. Hãy thử ảnh rõ hơn hoặc nhập nội dung thủ công.');
+          try {
+            const aiData = await predictImageWithAi(selectedImage);
+            if (aiData.extracted_text) {
+              textarea.value = aiData.extracted_text;
+              updateCounter();
+            }
+            ocrStatus.textContent = 'Đã phân loại ảnh bằng ChatGPT API.';
+            renderPrediction(aiData);
+          } catch (aiError) {
+            ocrStatus.textContent = 'AI chưa sẵn sàng, đang fallback sang OCR trên trình duyệt...';
+            setResult('Đang đọc chữ trong ảnh bằng OCR...', 'status-box');
+            const worker = await getWorker();
+            const result = await worker.recognize(selectedImage);
+            const text = result.data.text.trim();
+            if (!text) {
+              throw new Error('Không đọc được chữ trong ảnh. Hãy thử ảnh rõ hơn hoặc nhập nội dung thủ công.');
+            }
+            textarea.value = text;
+            updateCounter();
+            ocrStatus.textContent = 'Đã đọc chữ từ ảnh và tự động gửi đi kiểm tra.';
+            await predictText(text);
           }
-          textarea.value = text;
-          updateCounter();
-          ocrStatus.textContent = 'Đã đọc chữ từ ảnh và tự động gửi đi kiểm tra.';
-          await predictText(text);
         } catch (error) {
           setResult(error.message || 'Không thể đọc ảnh.', 'status-box danger');
           ocrStatus.textContent = error.message || 'Không thể đọc ảnh.';
         } finally {
           imageButton.disabled = false;
           button.disabled = false;
-          imageButton.textContent = 'Đọc ảnh và kiểm tra';
+          imageButton.textContent = 'Kiểm tra ảnh';
         }
       }
 

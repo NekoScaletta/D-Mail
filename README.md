@@ -63,6 +63,22 @@ Web mặc định gọi API tại `http://localhost:8000`. Nếu backend deploy 
 VITE_API_URL=https://your-backend.onrender.com
 ```
 
+### Dùng ChatGPT API để phân loại
+
+Backend hỗ trợ thêm OpenAI Responses API cho:
+
+- Văn bản: `POST /predict` sẽ ưu tiên ChatGPT API nếu có `OPENAI_API_KEY`, sau đó fallback về model TF-IDF đã train nếu OpenAI chưa cấu hình hoặc bị lỗi.
+- Hình ảnh: `POST /predict-image` nhận ảnh base64 và dùng model vision để đọc email trong ảnh rồi phân loại spam/ham.
+
+Tạo biến môi trường trong `backend/.env` hoặc trên Vercel project backend:
+
+```env
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Không đặt OpenAI key trong web vì browser sẽ làm lộ key.
+
 ### 4. Chạy mobile bằng Expo
 
 ```bash
