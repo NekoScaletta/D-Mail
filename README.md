@@ -98,20 +98,5 @@ Nếu gặp cảnh báo Node engine từ Expo, đổi sang Node 20 LTS hoặc No
 4. Output directory: `dist`.
 5. Thêm biến môi trường `VITE_API_URL` trỏ về URL backend Render.
 
-## Gợi ý ảnh chụp cho báo cáo
 
-- Cấu trúc thư mục project.
-- Swagger UI của FastAPI tại `/docs`.
-- Kết quả train model có Accuracy, Precision, Recall, F1-score.
-- Web đang phân loại một email spam.
-- Web đang phân loại một email không spam.
-- App mobile chạy trên Expo Go.
-- Sơ đồ kiến trúc web/mobile gọi chung backend.
 
-## Gợi ý khi thuyết trình demo
-
-- Trình bày lý do chọn TF-IDF + Logistic Regression vì nhẹ, dễ deploy free.
-- Demo backend `/predict` trước bằng Swagger.
-- Demo web và mobile cùng gọi một backend.
-- Giải thích fallback demo chỉ để test luồng khi chưa có model, còn kết quả chính thức dùng model đã train.
-- Nêu cách thay dataset mẫu bằng dataset lớn hơn để cải thiện độ chính xác.
